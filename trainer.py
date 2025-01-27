@@ -1,3 +1,4 @@
+import os
 import torch
 from tqdm import tqdm
 from torchvision import utils
@@ -65,7 +66,6 @@ class Trainer:
         device="cuda" if torch.cuda.is_available() else "cpu"
         return device
 
-
     def save(self, milestone: int) -> None:
         data = {
             "step": self.step,
@@ -79,32 +79,25 @@ class Trainer:
         print("saved")
 
     def load(self) -> None:
-      if self.best_params!=None:
-        data = torch.load(
-            self.best_params,
-            map_location=self.device,
-        )
-        # When coded, the old model has the need of these buffers,
-        # but it came to change and, for now don't need anymore
-        #del data["ema"]["online_model.log_one_minus_alphas_cumprod"]
-        #del data["ema"]["online_model.sqrt_recip_alphas_cumprod"]
-        #del data["ema"]["online_model.sqrt_recipm1_alphas_cumprod"]
-        #del data["ema"]["ema_model.log_one_minus_alphas_cumprod"]
-        #del data["ema"]["ema_model.sqrt_recip_alphas_cumprod"]
-        #del data["ema"]["ema_model.sqrt_recipm1_alphas_cumprod"]
+        if self.best_params is not None and os.path.exists(self.best_params):
+            data = torch.load(
+                self.best_params,
+                map_location=self.device,
+            )
+            self.model.model.load_state_dict(data["model"])
 
-        self.model.model.load_state_dict(data["model"])
+            self.step = data["step"]
+            self.opt.load_state_dict(data["opt"])
+            self.ema.load_state_dict(data["ema"])
 
-        self.step = data["step"]
-        self.opt.load_state_dict(data["opt"])
-        self.ema.load_state_dict(data["ema"])
+            if "version" in data:
+                print(f"loading from version {data['version']}")
+        else:
+            print("No saved model found. Starting training from scratch.")
 
-        if "version" in data:
-            print(f"loading from version {data['version']}")
-
-    def train(self, ifcontinue:bool=False) -> None:
-        if ifcontinue == True:
-          self.load()
+    def train(self, ifcontinue: bool = False) -> None:
+        if ifcontinue:
+            self.load()
         with tqdm(initial=self.step, total=self.train_num_steps) as pbar:
             while self.step < self.train_num_steps:
                 total_loss = 0.0
@@ -126,9 +119,8 @@ class Trainer:
                     self.ema.ema_model.eval()
 
                     with torch.inference_mode():
-                        milestone =self.step // self.save_and_sample_every
+                        milestone = self.step // self.save_and_sample_every
                         denoised_imgs = self.ema.ema_model.sample(
-                            #batch_size=self.num_samples
                             initial_image=data
                         )
                         sampled_imgs = self.ema.ema_model.sample(
