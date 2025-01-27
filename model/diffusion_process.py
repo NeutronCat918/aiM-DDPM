@@ -1,6 +1,6 @@
-from torch import nn
-
 import torch
+import torch.nn as nn
+from typing import Union
 import math
 from torch.functional import F
 from .scheduler import linear_beta_schedule,cosine_beta_schedule,sigmoid_beta_schedule
@@ -9,6 +9,7 @@ from tqdm import tqdm
     
 
 class DiffusionModel(nn.Module):
+    
     SCHEDULER_MAPPING = {
         "linear": linear_beta_schedule,
         "cosine": cosine_beta_schedule,
@@ -22,7 +23,8 @@ class DiffusionModel(nn.Module):
         *,
         beta_scheduler: str = "linear",
         timesteps: int = 1000,
-        schedule_fn_kwargs: dict | None = None,
+        schedule_fn_kwargs: Union[dict, None] = None,
+        #schedule_fn_kwargs: dict | None = None,
         auto_normalize: bool = True,
     ) -> None:
         super().__init__()
