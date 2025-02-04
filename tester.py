@@ -87,7 +87,8 @@ class Tester:
         self.load()
 
 
-        anom_image = next(self.dl).to(self.device)
+        anom_image = next(self.dl)[0].to(self.device)
+        anom_index=next(self.dl)[1].detach().cpu().numpy()
         print("data loaded")
         self.ema.ema_model.eval()
 
@@ -108,7 +109,9 @@ class Tester:
           for ix, denoised_img in enumerate(denoised_imgs):
             torchvision.utils.save_image(
               denoised_img,
-              str(self.results_folder)+f"/denoise-test-{ix}.png",
+              str(self.results_folder)+f"/denoise-test-{anom_index[ix]}.png",
                         )
+            np.save(str(self.results_folder)+f"/denoise/denoised-{anom_indexies[ix]}.npy",denoised_img.detach().cpu().numpy())
+            np.save(str(self.results_folder)+f"/denoise/anom-{anom_indexies[ix]}.npy",anom_img[ix,0,:,:].detach().cpu().numpy())
 
         
