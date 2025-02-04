@@ -101,7 +101,8 @@ class Trainer:
         with tqdm(initial=self.step, total=self.train_num_steps) as pbar:
             while self.step < self.train_num_steps:
                 total_loss = 0.0
-                data = next(self.dl).to(self.device)
+                data = next(self.dl)[0].to(self.device)
+                index=next(self.dl)[1].detach().cpu().numpy()
                 loss = self.model(data)
                 total_loss += loss.item()
 
@@ -135,8 +136,10 @@ class Trainer:
                     for ix, denoised_img in enumerate(denoised_imgs):
                         torchvision.utils.save_image(
                             denoised_img,
-                            str(self.results_folder)+f"/denoise-{milestone}-{ix}.png",
+                            str(self.results_folder)+f"/denoise-{milestone}-{index[ix]}.png",
                         )
+                        np.save(str(self.results_folder)+f"/denoise/{milestone}-{index[ix]}.npy",denoised_img.detach().cpu().numpy())
+                        np.save(str(self.results_folder)+f"/denoise/gt_{milestone}-{index[ix]}.npy",data[ix,0,:,:].detach().cpu().numpy())
 
                     self.save(milestone)
                 pbar.update(1)
