@@ -120,8 +120,14 @@ class Trainer:
                     self.ema.ema_model.eval()
 
                     with torch.inference_mode():
-                        milestone = self.step // self.save_and_sample_every
+                        milestone =self.step // self.save_and_sample_every
+                        self.save(milestone)
+                        os.makedirs(str(self.results_folder)+f"/{milestone}/GT")
+                        os.makedirs(str(self.results_folder)+f"/{milestone}/Sampled")
+                        os.makedirs(str(self.results_folder)+f"/{milestone}/Denoised")
+                        self.save(milestone)
                         denoised_imgs = self.ema.ema_model.sample(
+                            #batch_size=self.num_samples
                             initial_image=data
                         )
                         sampled_imgs = self.ema.ema_model.sample(
@@ -129,17 +135,9 @@ class Trainer:
                         )
 
                     for ix, sampled_img in enumerate(sampled_imgs):
-                        torchvision.utils.save_image(
-                            sampled_img,
-                            str(self.results_folder)+f"/sample-{milestone}-{ix}.png",
-                        )
-                    for ix, denoised_img in enumerate(denoised_imgs):
-                        torchvision.utils.save_image(
-                            denoised_img,
-                            str(self.results_folder)+f"/denoise-{milestone}-{index[ix]}.png",
-                        )
-                        np.save(str(self.results_folder)+f"/denoise/{milestone}-{index[ix]}.npy",denoised_img.detach().cpu().numpy())
-                        np.save(str(self.results_folder)+f"/denoise/gt_{milestone}-{index[ix]}.npy",data[ix,0,:,:].detach().cpu().numpy())
+                      np.save(str(self.results_folder)+f"/{milestone}/Sampled/{ix}.npy",sampled_img.detach().cpu().numpy())
 
-                    self.save(milestone)
+                    for ix, denoised_img in enumerate(denoised_imgs):
+                      np.save(str(self.results_folder)+f"/{milestone}/Denoised/{index[ix]}.npy",denoised_img.detach().cpu().numpy())
+                      np.save(str(self.results_folder)+f"/{milestone}/GT/{index[ix]}.npy",data[ix,0,:,:].detach().cpu().numpy())
                 pbar.update(1)
