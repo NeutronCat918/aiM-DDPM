@@ -21,7 +21,7 @@ class MyDataset(torch.utils.data.Dataset):
 
         img_npy = np.load(img_file)[0:self.size,0:self.size]
         img_tensor= torch.Tensor(img_npy).reshape(1, self.size, self.size)
-        return img_tensor
+        return img_tensor,idx
         
     def __len__(self):
         return len(self.images)
