@@ -104,22 +104,13 @@ class Tester:
           sampled_imgs = self.ema.ema_model.sample(
                             batch_size=self.num_samples
                         )
-
-          with torch.inference_mode():       
-          denoised_imgs = self.ema.ema_model.sample(
-                            # batch_size=self.num_samples
-                            initial_image=anom_image
-                        )
-          sampled_imgs = self.ema.ema_model.sample(
-                            batch_size=self.num_samples
-                        )
-
+    
           for ix, sampled_img in enumerate(sampled_imgs):
             np.save(str(self.results_folder)+f"/Sample/{ix}.npy",sampled_img.detach().cpu().numpy().reshape((self.image_size,self.image_size)))
-
+    
           for ix, denoised_img in enumerate(denoised_imgs):
             np.save(str(self.results_folder)+f"/Denoised/{filelist[anom_indexies[ix]]}",denoised_img.detach().cpu().numpy().reshape((self.image_size,self.image_size)))
-
+    
           for ix,data in enumerate(anom_image):
             np.save(str(self.results_folder)+f"/Anomaly/{filelist[anom_indexies[ix]]}",data.detach().cpu().numpy().reshape((self.image_size,self.image_size)))
 
