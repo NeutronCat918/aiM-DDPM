@@ -3,7 +3,7 @@
 #SBATCH -e train_model_gpu.err
 #SBATCH -J train_GPU 
 #SBATCH -n 1
-#SBATCH --mem=200G
+#SBATCH --mem=20G
 #SBATCH -p scavenger-gpu 
 #SBATCH --gres=gpu:1 
 #SBATCH --exclusive
