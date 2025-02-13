@@ -29,6 +29,7 @@ class Tester:
         self.channels = diffusion_model.channels
 
         self.step = 0
+        self.anom_folder=anom_folder
 
         self.num_samples = num_samples
         self.save_and_sample_every = save_and_sample_every
@@ -86,10 +87,14 @@ class Tester:
     def eval(self) -> None:
         self.load()
 
+        loaded_data=next(self.dl)
 
-        anom_image = next(self.dl).to(self.device)
+
+        anom_image = loaded_data[0].to(self.device)
+        anom_indexies=loaded_data[1].detach().cpu().numpy()
         print("data loaded")
         self.ema.ema_model.eval()
+        filelist=os.listdir(glob.glob(self.anom_folder)[0])
 
         with torch.inference_mode():       
           denoised_imgs = self.ema.ema_model.sample(
@@ -99,16 +104,14 @@ class Tester:
           sampled_imgs = self.ema.ema_model.sample(
                             batch_size=self.num_samples
                         )
-
+    
           for ix, sampled_img in enumerate(sampled_imgs):
-            torchvision.utils.save_image(
-              sampled_img,
-              str(self.results_folder)+f"/sample-test-{ix}.png",
-                        )
+            np.save(str(self.results_folder)+f"/Sample/{ix}.npy",sampled_img.detach().cpu().numpy().reshape((self.image_size,self.image_size)))
+    
           for ix, denoised_img in enumerate(denoised_imgs):
-            torchvision.utils.save_image(
-              denoised_img,
-              str(self.results_folder)+f"/denoise-test-{ix}.png",
-                        )
+            np.save(str(self.results_folder)+f"/Denoised/{filelist[anom_indexies[ix]]}",denoised_img.detach().cpu().numpy().reshape((self.image_size,self.image_size)))
+    
+          for ix,data in enumerate(anom_image):
+            np.save(str(self.results_folder)+f"/Anomaly/{filelist[anom_indexies[ix]]}",data.detach().cpu().numpy().reshape((self.image_size,self.image_size)))
 
         
