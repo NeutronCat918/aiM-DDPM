@@ -8,27 +8,29 @@ import json
 from model.UNet import TwoResUNet,OneResUNet, AttentionUNet
 from tester import Tester
 
+
 config_file={
   "model_name": "twores_128_1",
   "trainer_config": {
-    "train_batch_size": 16,
-    "train_lr": 1e-4,
+    "train_batch_size": 16, 
+    "train_lr": 1e-5,
     "train_num_steps": 10000,
-    "save_and_sample_every": 500,
+    "save_and_sample_every": 100,
     "num_samples": 4
   },
   "unet_config": {
-    "model_mapping": "TwoResUNet",
+    "model_mapping": "OneResUNet",
     "input": 64,
     "batch_size": 16,
     "dim_mults": [1, 2, 4, 8],
     "channels": 1
   },
   "diffusion_config": {
-    "timesteps": 1000,
+    "timesteps": 100,
     "betas_scheduler": "linear",
     "image_size": 128
   }
+}
 
   }
 
@@ -39,7 +41,7 @@ unet_config = config_file.get("unet_config")
 trainer_config = config_file.get("trainer_config")
 diffusion_config = config_file.get("diffusion_config")
 
-unet_ = TwoResUNet #Set Unet Type
+unet_ = OneResUNet #Set Unet Type
 
 model = unet_(
     dim=unet_config.get("input"),
@@ -64,12 +66,12 @@ trainer = Trainer(
     train_num_steps=trainer_config.get("train_num_steps"),
     save_and_sample_every=trainer_config.get("save_and_sample_every"),
     num_samples=trainer_config.get("num_samples"),
-    best_params='./Results/model-X.pt')
+    best_params='./Results/best-model-yet.pt')
 
 tester = Tester(diffusion_model=diffusion_model,    
    anom_folder='./Data/Anomaly',
     results_folder='./Results/Eval', 
-    params_path=r"./Results/model-X.pt",
+    params_path=r"./Results/best-model-yet.pt",
 num_samples=16)
 
 
