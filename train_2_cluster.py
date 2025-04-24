@@ -8,33 +8,38 @@ from model.utils import parser #this module is defined within the directory
 from argparse import ArgumentParser, Namespace #this module needs to be part of your conda enviornment
 import os #standard python library module
 import json #standard python library module
-from model.UNet import TwoResUNet,OneResUNet #this module is defined within the directory
+from model.UNet import TwoResUNet,OneResUNet, AttentionUNet #this module is defined within the directory
 #from tester import Tester #not running testing on this code, training only.
+
+
+os.environ["TORCH_USE_CUDA_DSA"]="1"
+os.environ["TORCH_CUDA_ALLOC_SYNC"]="1"
 
 
 #This file will need to be abstracted out of this code and read in later.
 config_file={
   "model_name": "twores_128_1",
   "trainer_config": {
-    "train_batch_size": 16, #currently 1680 images in Ground-Truth, which means there are 105 batches per epoch
+    "train_batch_size": 16, 
     "train_lr": 1e-4,
-    "train_num_steps": 1000,
-    "save_and_sample_every": 300,
+    "train_num_steps": 20000,
+    "save_and_sample_every": 200,
     "num_samples": 4
   },
   "unet_config": {
-    "model_mapping": "TwoResUNet",
+    "model_mapping": "OneResUNet",
     "input": 64,
     "batch_size": 16,
     "dim_mults": [1, 2, 4, 8],
     "channels": 1
   },
   "diffusion_config": {
-    "timesteps": 500, #downsized for time efficiency
+    "timesteps": 150,
     "betas_scheduler": "linear",
     "image_size": 128
   }
 }
+
 
 print(torch.__version__)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -44,7 +49,7 @@ unet_config = config_file.get("unet_config")
 trainer_config = config_file.get("trainer_config")
 diffusion_config = config_file.get("diffusion_config")
 
-unet_ = TwoResUNet #Set Unet Type
+unet_ = OneResUNet #Set Unet Type
 
 model = unet_(
     dim=unet_config.get("input"),
@@ -69,7 +74,7 @@ trainer = Trainer(
     train_num_steps=trainer_config.get("train_num_steps"),
     save_and_sample_every=trainer_config.get("save_and_sample_every"),
     num_samples=trainer_config.get("num_samples"),
-    best_params='./Results/model-X.pt')
+    best_params='./Results/model-100.pt')
 
 
-trainer.train(ifcontinue=True)
+trainer.train(ifcontinue=False)
