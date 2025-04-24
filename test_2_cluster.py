@@ -9,13 +9,14 @@ from model.UNet import TwoResUNet,OneResUNet, AttentionUNet
 from tester import Tester
 
 
+#This file will need to be abstracted out of this code and read in later.
 config_file={
   "model_name": "twores_128_1",
   "trainer_config": {
     "train_batch_size": 16, 
-    "train_lr": 1e-5,
-    "train_num_steps": 10000,
-    "save_and_sample_every": 100,
+    "train_lr": 1e-4,
+    "train_num_steps": 20000,
+    "save_and_sample_every": 200,
     "num_samples": 4
   },
   "unet_config": {
@@ -26,13 +27,14 @@ config_file={
     "channels": 1
   },
   "diffusion_config": {
-    "timesteps": 100,
+    "timesteps": 150,
     "betas_scheduler": "linear",
     "image_size": 128
   }
 }
 
-  }
+print(torch.__version__)
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 unet_config = config_file.get("unet_config")
 trainer_config = config_file.get("trainer_config")
@@ -56,24 +58,13 @@ diffusion_model = DiffusionModel(
     timesteps=diffusion_config.get("timesteps"),
 ) #Make Diffusion model here
 
-#make input and output paths relative to make it easier to to add code to your desired directory
-trainer = Trainer(
-    diffusion_model=diffusion_model,
-    folder='./Data/Ground-Truth',
-    results_folder='./Results',
-    train_batch_size=trainer_config.get("train_batch_size"),
-    train_lr=trainer_config.get("train_lr"),
-    train_num_steps=trainer_config.get("train_num_steps"),
-    save_and_sample_every=trainer_config.get("save_and_sample_every"),
-    num_samples=trainer_config.get("num_samples"),
-    best_params='./Results/best-model-yet.pt')
-
 tester = Tester(diffusion_model=diffusion_model,    
-   anom_folder='./Data/Anomaly',
+   anom_folder='./Data/test',
     results_folder='./Results/Eval', 
-    params_path=r"./Results/best-model-yet.pt",
-num_samples=16)
+    params_path=r"./Results/model-100.pt",
+num_samples=100)
 
 
 
 tester.eval()
+
