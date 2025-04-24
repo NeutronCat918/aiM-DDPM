@@ -62,7 +62,7 @@ diffusion_model = DiffusionModel(
 tester = Tester(diffusion_model=diffusion_model,    
    anom_folder='./Data/test',
     results_folder='./Results/Eval', 
-    params_path=r"./Results/model-100.pt",
+    params_path=r"./Results/best-model-yet.pt",
 num_samples=100)
 
 
