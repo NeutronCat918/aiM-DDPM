@@ -9,14 +9,15 @@ from model.UNet import TwoResUNet,OneResUNet, AttentionUNet
 from tester import Tester
 
 
-#This file will need to be abstracted out of this code and read in later.
+
+
 config_file={
   "model_name": "twores_128_1",
   "trainer_config": {
     "train_batch_size": 16, 
-    "train_lr": 1e-4,
-    "train_num_steps": 20000,
-    "save_and_sample_every": 200,
+    "train_lr": 1e-5,
+    "train_num_steps": 10000,
+    "save_and_sample_every": 100,
     "num_samples": 4
   },
   "unet_config": {
@@ -27,7 +28,7 @@ config_file={
     "channels": 1
   },
   "diffusion_config": {
-    "timesteps": 150,
+    "timesteps": 100,
     "betas_scheduler": "linear",
     "image_size": 128
   }
